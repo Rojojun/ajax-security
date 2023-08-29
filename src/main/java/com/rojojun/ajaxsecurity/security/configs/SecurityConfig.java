@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @Order(1)
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfig {
     private FormWebAuthenticationDetailsSource formWebAuthenticationDetailsSource;
     private FormAuthenticationSuccessHandler formAuthenticationSuccessHandler;
     private FormAuthenticationFailureHandler formAuthenticationFailureHandler;
@@ -42,8 +41,9 @@ public class SecurityConfig {
         authenticationManagerBuilder.authenticationProvider(authenticationProvider());
     }
 
-    public AuthenticationManager authenticationManager() {
-        return authenticationManager();
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Bean
@@ -84,7 +84,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        return new FormAuthenticationProvider(passwordEncoder());
+        return new FormAuthenticationProvider();
     }
 
     @Bean
