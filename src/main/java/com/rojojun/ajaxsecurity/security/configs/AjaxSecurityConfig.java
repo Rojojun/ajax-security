@@ -1,5 +1,7 @@
 package com.rojojun.ajaxsecurity.security.configs;
 
+import com.rojojun.ajaxsecurity.security.common.AjaxAccessDeniedHandler;
+import com.rojojun.ajaxsecurity.security.common.AjaxLoginAuthenticationEntryPoint;
 import com.rojojun.ajaxsecurity.security.filter.AjaxLoginProcessingFilter;
 import com.rojojun.ajaxsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import com.rojojun.ajaxsecurity.security.handler.AjaxAuthenticationSuccessHandler;
@@ -10,7 +12,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -24,8 +28,8 @@ public class AjaxSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return authenticationManagerBean();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -50,14 +54,21 @@ public class AjaxSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
+                        .authenticationEntryPoint(new AjaxLoginAuthenticationEntryPoint())
+                        .accessDeniedHandler(ajaxAccessDeniedHandler()))
                 .csrf(csrf -> csrf
                         .disable())
         ;
     }
 
+    private AccessDeniedHandler ajaxAccessDeniedHandler() {
+        return new AjaxAccessDeniedHandler();
+    }
+
     public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
         AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
-        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
+        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManager(null));
         ajaxLoginProcessingFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
         ajaxLoginProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
         return ajaxLoginProcessingFilter;
