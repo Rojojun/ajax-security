@@ -27,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @Order(1)
-public class SecurityConfig extends WebSecurityConfig {
+public class SecurityConfig {
     private FormWebAuthenticationDetailsSource formWebAuthenticationDetailsSource;
     private FormAuthenticationSuccessHandler formAuthenticationSuccessHandler;
     private FormAuthenticationFailureHandler formAuthenticationFailureHandler;
@@ -41,9 +41,8 @@ public class SecurityConfig extends WebSecurityConfig {
         authenticationManagerBuilder.authenticationProvider(authenticationProvider());
     }
 
-    @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+        return authenticationManagerBean();
     }
 
     @Bean
@@ -64,16 +63,15 @@ public class SecurityConfig extends WebSecurityConfig {
                         .failureHandler(formAuthenticationFailureHandler)
                         .permitAll()
                 )
-                .exceptionHandling(exeptionHandling -> exeptionHandling
+                .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                         .accessDeniedPage("/denied")
                         .accessDeniedHandler(accessDeniedHandler())
                 )
                 .csrf(csrf -> csrf
                         .disable()
-                )
-                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
-
+                );
+                //.addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -92,11 +90,5 @@ public class SecurityConfig extends WebSecurityConfig {
         CommonAccessDeniedHandler commonAccessDeniedHandler = new CommonAccessDeniedHandler();
         commonAccessDeniedHandler.setErrorPage("/denied");
         return commonAccessDeniedHandler;
-    }
-
-    @Bean
-    public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() {
-        AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
-        ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManager());
     }
 }
