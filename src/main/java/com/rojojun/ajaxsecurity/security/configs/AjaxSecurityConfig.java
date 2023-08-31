@@ -58,8 +58,18 @@ public class AjaxSecurityConfig {
                         .authenticationEntryPoint(new AjaxLoginAuthenticationEntryPoint())
                         .accessDeniedHandler(ajaxAccessDeniedHandler()))
                 .csrf(csrf -> csrf
-                        .disable())
-        ;
+                        .disable());
+
+        customConfigurerAjax(http);
+    }
+
+    private void customConfigurerAjax(HttpSecurity http) throws Exception {
+        http
+                .apply(new AjaxLoginConfigurer<>())
+                .successHandlerAjax(authenticationSuccessHandler())
+                .failureHandlerAjax(authenticationFailureHandler())
+                .setAuthenticationManager(authenticationManager(null))
+                .createLoginProcessingUrlMatcher("/api/login");
     }
 
     private AccessDeniedHandler ajaxAccessDeniedHandler() {
